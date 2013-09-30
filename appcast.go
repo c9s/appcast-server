@@ -81,7 +81,7 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Rele
 		return nil, err
 	}
 
-	dstFilePath := path.Join(UPLOAD_DIR, fileReader.Filename)
+	var dstFilePath = path.Join(UPLOAD_DIR, fileReader.Filename)
 	if err = ioutil.WriteFile(dstFilePath, data, 0777); err != nil {
 		return nil, err
 	}
@@ -121,45 +121,12 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Rele
 	newRelease.PubDate = &pubDateTime
 	newRelease.Length = length
 	newRelease.Mimetype = mimetype
+	newRelease.Channel = channelIdentity
 	newRelease.Init()
 	var result = newRelease.Create()
 	if result.Error != nil {
-		panic(result.Error)
+		panic(result)
 	}
-
-	/*
-		var newItem = appcast.Item{}
-		newItem.Title = title
-		newItem.Description = desc
-		if pubDate != "" {
-			newItem.PubDate = rss.Date(pubDate)
-		}
-		newItem.Enclosure.SparkleVersion = version
-		newItem.Enclosure.SparkleVersionShortString = shortVersionString
-		newItem.Enclosure.SparkleDSASignature = dsaSignature
-		// newItem.SparkleReleaseNotesLink = releaseNotes
-
-		result, err := db.Exec(`INSERT INTO releases
-			(channel, title, desc, pubDate, version, shortVersionString, releaseNotes, dsaSignature, filename, length, mimetype, token)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			channelIdentity,
-			title,
-			desc,
-			pubDate,
-			version,
-			shortVersionString,
-			releaseNotes,
-			dsaSignature,
-			fileReader.Filename,
-			length, mimetype, token)
-		if err != nil {
-			return nil, err
-		}
-		id, err := result.LastInsertId()
-		if err != nil {
-			return nil, err
-		}
-	*/
 	log.Println("New Release Uploaded", newRelease)
 	return &newRelease, nil
 }
@@ -272,6 +239,16 @@ func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 			db.Exec(`UPDATE releases SET downloaded = downloaded + 1 WHERE id = ?`, release.Id)
 			w.Header().Set("Content-Type", release.Mimetype)
 			w.Header().Set("Content-Disposition", "inline; filename=\""+release.Filename+"\"")
+
+			dlog := DownloadLog{
+				RemoteAddr: r.RemoteAddr,
+				RequestURI: r.RequestURI,
+				UserAgent:  r.UserAgent(),
+				Referer:    r.Referer(),
+				ReleaseId:  release.Id,
+			}
+			dlog.Init()
+			dlog.Create()
 
 			data, err := ioutil.ReadFile(path.Join(UPLOAD_DIR, release.Filename))
 			if err != nil {

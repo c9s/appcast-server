@@ -35,7 +35,8 @@ func prepareTables(db *sql.DB) {
 }
 
 func createAccountTable(db *sql.DB) {
-	if _, err := db.Exec(`create table account(
+	if _, err := db.Exec(`
+	CREATE TABLE accounts(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		account varchar,
 		token varchar
@@ -45,7 +46,7 @@ func createAccountTable(db *sql.DB) {
 }
 
 func createChannelTable(db *sql.DB) {
-	if _, err := db.Exec(`create table channels(
+	if _, err := db.Exec(`CREATE TABLE channels(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title varchar,
 		description text,
@@ -57,36 +58,40 @@ func createChannelTable(db *sql.DB) {
 	/*
 		http://localhost:8080/appcast/gotray/4cbd040533a2f43fc6691d773d510cda70f4126a
 	*/
-	if _, err := db.Exec(`insert into channels(title,description, identity, token) values (?,?,?,?)`, "GoTray", "Desc", "gotray", "4cbd040533a2f43fc6691d773d510cda70f4126a"); err != nil {
+	if _, err := db.Exec(`INSERT INTO channels(title,description, identity, token) values (?,?,?,?)`, "GoTray", "Desc", "gotray", "4cbd040533a2f43fc6691d773d510cda70f4126a"); err != nil {
 		panic(err)
 	}
 }
 
 func createDownloadLogTable(db *sql.DB) {
-	if _, err := db.Exec(`create table download_logs(
+	if _, err := db.Exec(`
+	CREATE TABLE download_logs(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		remoteAddr varchar,
-		userAgent varchar,
-		releaseId integer
-	);`); err != nil {
+		remote_addr varchar,
+		request_uri varchar,
+		referer varchar,
+		user_agent varchar,
+		release_id integer
+	);
+	`); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func createReleaseTable(db *sql.DB) {
-	if _, err := db.Exec(`create table releases(
+	if _, err := db.Exec(`CREATE TABLE releases(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title varchar,
 		desc text,
-		releaseNotes text,
-		pubDate datetime default current_timestamp,
+		release_notes text,
+		pubdate datetime default current_timestamp,
 		filename varchar,
 		channel varchar,
 		length integer,
 		mimetype varchar,
 		version varchar,
-		shortVersionString varchar,
-		dsaSignature varchar,
+		short_version_string varchar,
+		dsa_signature varchar,
 		token varchar,
 		downloaded integer default 0
 	);`); err != nil {
