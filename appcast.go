@@ -266,7 +266,10 @@ func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 
 	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
 		if release := LoadReleaseByChannelAndToken(channelIdentity, releaseToken); release != nil {
-			log.Println(r.URL.Path, release.Filename, release.Mimetype)
+			release.Downloaded++
+			release.Update()
+			log.Println("Downloading Release", release.Filename, release.Mimetype, release.Downloaded)
+
 			w.Header().Set("Content-Type", release.Mimetype)
 			w.Header().Set("Content-Disposition", "inline; filename=\""+release.Filename+"\"")
 
