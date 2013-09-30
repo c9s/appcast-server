@@ -66,7 +66,7 @@ func UploadReleaseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*appcast.Item, error) {
+func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Release, error) {
 	file, fileReader, err := r.FormFile("file")
 	if err == http.ErrMissingFile {
 		return nil, err
@@ -104,40 +104,64 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*appc
 	h.Write(data)
 	token := fmt.Sprintf("%x", h.Sum(nil))
 
-	var newItem = appcast.Item{}
-	newItem.Title = title
-	newItem.Description = desc
-	if pubDate != "" {
-		newItem.PubDate = rss.Date(pubDate)
-	}
-	newItem.Enclosure.SparkleVersion = version
-	newItem.Enclosure.SparkleVersionShortString = shortVersionString
-	newItem.Enclosure.SparkleDSASignature = dsaSignature
-	// newItem.SparkleReleaseNotesLink = releaseNotes
-
-	result, err := db.Exec(`INSERT INTO releases 
-		(channel, title, desc, pubDate, version, shortVersionString, releaseNotes, dsaSignature, filename, length, mimetype, token)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		channelIdentity,
-		title,
-		desc,
-		pubDate,
-		version,
-		shortVersionString,
-		releaseNotes,
-		dsaSignature,
-		fileReader.Filename,
-		length, mimetype, token)
+	pubDateTime, err := time.Parse("2006-01-02", pubDate)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil, err
+	newRelease := Release{}
+	newRelease.Title = title
+	newRelease.Description = desc
+	newRelease.Version = version
+	newRelease.ShortVersionString = shortVersionString
+	newRelease.ReleaseNotes = releaseNotes
+	newRelease.DSASignature = dsaSignature
+	newRelease.Token = token
+	newRelease.Filename = fileReader.Filename
+	newRelease.PubDate = &pubDateTime
+	newRelease.Length = length
+	newRelease.Mimetype = mimetype
+	newRelease.Init()
+	var result = newRelease.Create()
+	if result.Error != nil {
+		panic(result.Error)
 	}
-	log.Println("New Release Uploaded", id, title, version, shortVersionString, desc, pubDate, dsaSignature, length, mimetype)
-	return &newItem, nil
+
+	/*
+		var newItem = appcast.Item{}
+		newItem.Title = title
+		newItem.Description = desc
+		if pubDate != "" {
+			newItem.PubDate = rss.Date(pubDate)
+		}
+		newItem.Enclosure.SparkleVersion = version
+		newItem.Enclosure.SparkleVersionShortString = shortVersionString
+		newItem.Enclosure.SparkleDSASignature = dsaSignature
+		// newItem.SparkleReleaseNotesLink = releaseNotes
+
+		result, err := db.Exec(`INSERT INTO releases
+			(channel, title, desc, pubDate, version, shortVersionString, releaseNotes, dsaSignature, filename, length, mimetype, token)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			channelIdentity,
+			title,
+			desc,
+			pubDate,
+			version,
+			shortVersionString,
+			releaseNotes,
+			dsaSignature,
+			fileReader.Filename,
+			length, mimetype, token)
+		if err != nil {
+			return nil, err
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+	*/
+	log.Println("New Release Uploaded", newRelease)
+	return &newRelease, nil
 }
 
 func UploadPageHandler(w http.ResponseWriter, r *http.Request) {

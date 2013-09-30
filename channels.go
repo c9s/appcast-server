@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/c9s/appcast"
 	"github.com/c9s/gatsby"
-	"github.com/c9s/rss"
 	"time"
 )
 
@@ -29,19 +28,6 @@ func (self *Channel) RegenerateToken(secret string) string {
 
 func (self *Channel) Init() {
 	self.BaseRecord.SetTarget(self)
-}
-
-var channels = map[string]appcast.Channel{
-	"gotray": appcast.Channel{
-		rss.Channel{
-			Title:         "GoTray Appcast",
-			Link:          "http://gotray.extremedev.org/appcast.xml",
-			Description:   "Most recent changes with links to updates.",
-			Language:      "en",
-			LastBuildDate: "",
-		},
-		[]appcast.Item{},
-	},
 }
 
 func CreateChannel(identity string, ch *appcast.Channel) (int64, error) {
