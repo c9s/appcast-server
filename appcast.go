@@ -36,7 +36,7 @@ var routeReleaseCreateRegExp = regexp.MustCompile("/release/create/([^/]+)/([^/]
 var routeDownloadRegExp = regexp.MustCompile("/release/download/([^/]+)/([^/]+)/([^/]+)")
 
 var db *sql.DB
-var templates = template.Must(template.ParseFiles("templates/upload.html"))
+var templates = template.Must(template.ParseGlob("templates/*.html"))
 
 func UploadReleaseHandler(w http.ResponseWriter, r *http.Request) {
 	submatches := routeReleaseCreateRegExp.FindStringSubmatch(r.URL.Path)
@@ -164,6 +164,26 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Rele
 	return &newRelease, nil
 }
 
+func CreateChannelHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		newChannel := Channel{}
+		newChannel.Title = r.FormValue("title")
+		newChannel.Token = r.FormValue("token")
+		newChannel.Identity = r.FormValue("identity")
+		newChannel.Description = r.FormValue("desc")
+		newChannel.Init()
+		newChannel.Create()
+	}
+
+	t := templates.Lookup("channel_create.html")
+	if t != nil {
+		err := t.Execute(w, nil)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func UploadPageHandler(w http.ResponseWriter, r *http.Request) {
 	submatches := routeUploadPageRegExp.FindStringSubmatch(r.URL.Path)
 	if len(submatches) != 3 {
@@ -275,6 +295,7 @@ func main() {
 	http.HandleFunc("/release/download/", DownloadFileHandler)
 	http.HandleFunc("/release/upload/", UploadPageHandler)
 	http.HandleFunc("/release/create/", UploadReleaseHandler)
+	http.HandleFunc("/channel/create", CreateChannelHandler)
 	http.HandleFunc("/appcast/", AppcastXmlHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
