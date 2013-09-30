@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+		<style>
+		body, input[type="text"], textarea {
+			font-size: 18px;
+		}
+		</style>
+    </head>
+    <body>
+		<h2>Create Channel</h2>
+        <div>
+            <form method="post" enctype="multipart/form-data">
+                <table>
+                    <tr>
+                        <td>Title</td>
+                        <td>
+                            <input type="text" name="title" placeholder="Channel Title"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Identity</td>
+                        <td>
+                            <input type="text" name="identity" placeholder="Channel Identity"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Channel Token</td>
+                        <td>
+                            <input type="text" name="token" placeholder="Channel Token"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>
+                            <textarea name="desc" rows="5" cols="70"></textarea>
+                        </td>
+                    </tr>
+                </table>
+				<button type="submit">Create</button>
+            </form>
+        </div>
+    </body>
+</html>
