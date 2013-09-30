@@ -1,14 +1,20 @@
 Search: <input ng-model="query">
 Sort by:
 <select ng-model="orderProp">
-	<option value="name">Alphabetical</option>
-	<option value="age">Newest</option>
+    <option value="name">Alphabetical</option>
+    <option value="age">Newest</option>
 </select>
-<ul>
-	<li ng-repeat="channel in channels | filter:query | orderBy:orderProp">
-	<a href="#/channels/{{channel.id}}" class="thumb">
-			{{channel.title}}
-		</a>
-		<p>{{channel.description}}</p>
-	</li>
+<ul class="list-group">
+    <li class="list-group-item clearfix" ng-repeat="channel in channels | filter:query | orderBy:orderProp">
+        <div class="pull-left">
+            <a href="#/channels/{{channel.id}}" class="thumb">
+                <i class="glyphicon glyphicon-link"> </i> 
+                {{channel.title}}</a>
+            <p>{{channel.description}}</p>
+        </div>
+        <div class="controls pull-right">
+            <a href="/appcast/{{channel.identity}}/{{channel.token}}" class="btn">Appcast XML</a>
+            <a href="#/channels/{{channel.id}}" class="btn">Edit</a>
+        </div>
+    </li>
 </ul>
