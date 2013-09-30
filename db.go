@@ -50,8 +50,8 @@ func createChannelTable(db *sql.DB) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title varchar,
 		description text,
-		identity varchar,
-		token varchar
+		identity varchar UNIQUE,
+		token varchar UNIQUE
 	);`); err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func createReleaseTable(db *sql.DB) {
 		version varchar,
 		short_version_string varchar,
 		dsa_signature varchar,
-		token varchar,
+		token varchar UNIQUE,
 		downloaded integer default 0
 	);`); err != nil {
 		log.Fatal(err)
