@@ -266,10 +266,10 @@ func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 
 	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
 		if release := LoadReleaseByChannelAndToken(channelIdentity, releaseToken); release != nil {
-			release.Downloaded++
-			release.Update()
-			log.Println("Downloading Release", release.Filename, release.Mimetype, release.Downloaded)
+			log.Println("Download release", release.Filename, release.Mimetype, release.Downloaded)
 
+			// Update downloaded counter
+			db.Exec(`UPDATE releases SET downloaded = downloaded + 1 WHERE id = ?`, release.Id)
 			w.Header().Set("Content-Type", release.Mimetype)
 			w.Header().Set("Content-Disposition", "inline; filename=\""+release.Filename+"\"")
 

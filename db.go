@@ -22,11 +22,16 @@ func ConnectDB(dbname string) *sql.DB {
 
 	if initDB {
 		log.Println("Initializing database schema...")
-		createAccountTable(db)
-		createReleaseTable(db)
-		createChannelTable(db)
+		prepareTables(db)
 	}
 	return db
+}
+
+func prepareTables(db *sql.DB) {
+	createAccountTable(db)
+	createReleaseTable(db)
+	createChannelTable(db)
+	createDownloadLogTable(db)
 }
 
 func createAccountTable(db *sql.DB) {
@@ -54,6 +59,17 @@ func createChannelTable(db *sql.DB) {
 	*/
 	if _, err := db.Exec(`insert into channels(title,description, identity, token) values (?,?,?,?)`, "GoTray", "Desc", "gotray", "4cbd040533a2f43fc6691d773d510cda70f4126a"); err != nil {
 		panic(err)
+	}
+}
+
+func createDownloadLogTable(db *sql.DB) {
+	if _, err := db.Exec(`create table download_logs(
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		remoteAddr varchar,
+		userAgent varchar,
+		releaseId integer
+	);`); err != nil {
+		log.Fatal(err)
 	}
 }
 
