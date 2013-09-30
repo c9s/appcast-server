@@ -7,14 +7,12 @@ import (
 	"regexp"
 )
 
+var routeAppcastRegExp = regexp.MustCompile("/appcast/([^/]+)/([^/]+)")
+
 func AppcastXmlHandler(w http.ResponseWriter, r *http.Request) {
-	var channelRegExp = regexp.MustCompile("/appcast/([^/]+)/([^/]+)")
-	var submatches = channelRegExp.FindStringSubmatch(r.URL.Path)
+	var submatches = routeAppcastRegExp.FindStringSubmatch(r.URL.Path)
 	var channelIdentity = submatches[1]
 	var channelToken = submatches[2]
-
-	log.Println(r.URL)
-
 	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
 		w.Header().Set("Content-Type", "text/xml; charset=UTF-8")
 
