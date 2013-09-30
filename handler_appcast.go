@@ -29,7 +29,7 @@ func AppcastXmlHandler(w http.ResponseWriter, r *http.Request) {
 		appcastRss := appcast.New()
 		appcastRss.Channel.Title = channel.Title
 		appcastRss.Channel.Description = channel.Description
-		appcastRss.Channel.Link = "http://" + r.Host + "/appcast/" + channelIdentity + "/" + channelToken
+		appcastRss.Channel.Link = BASEURL + "/appcast/" + channelIdentity + "/" + channelToken
 		// appcastRss.Channel.Language = channel.Language
 
 		for rows.Next() {
