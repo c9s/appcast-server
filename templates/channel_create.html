@@ -11,6 +11,11 @@
     <body>
 		<h2>Create Channel</h2>
         <div>
+			{{if .Created}}
+			<div>
+				Created
+			</div>
+			{{end}}
             <form method="post" enctype="multipart/form-data">
                 <table>
                     <tr>
