@@ -11,6 +11,10 @@ var routeAppcastRegExp = regexp.MustCompile("/appcast/([^/]+)/([^/]+)")
 
 func AppcastXmlHandler(w http.ResponseWriter, r *http.Request) {
 	var submatches = routeAppcastRegExp.FindStringSubmatch(r.URL.Path)
+	if len(submatches) != 3 {
+		ForbiddenHandler(w, r)
+		return
+	}
 	var channelIdentity = submatches[1]
 	var channelToken = submatches[2]
 	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
