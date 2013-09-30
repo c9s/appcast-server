@@ -16,9 +16,9 @@ import (
 
 import (
 	"github.com/c9s/appcast"
-	_ "github.com/c9s/appcast/server/uploader"
+	_ "github.com/c9s/appcast-server/uploader"
 	"github.com/c9s/gatsby"
-	// "github.com/c9s/jsondata"
+	"github.com/c9s/jsondata"
 	"github.com/c9s/rss"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -31,19 +31,37 @@ const SQLITEDB = "appcast.db"
 var ErrFileIsRequired = errors.New("file is required.")
 var ErrReleaseInsertFailed = errors.New("release insert failed.")
 
+var uploadPageRegExp = regexp.MustCompile("/release/upload/([^/]+)/([^/]+)")
+
 var db *sql.DB
 var templates = template.Must(template.ParseFiles("templates/upload.html"))
 
 func UploadReleaseHandler(w http.ResponseWriter, r *http.Request) {
-	/*
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		item, err := CreateNewReleaseFromRequest(r)
-		if err != nil {
+	submatches := uploadPageRegExp.FindStringSubmatch(r.URL.Path)
+	if len(submatches) != 3 {
+		ForbiddenHandler(w, r)
+		return
+	}
+	if r.Method != "POST" {
+		ForbiddenHandler(w, r)
+		return
+	}
+
+	channelIdentity := submatches[1]
+	channelToken := submatches[2]
+
+	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
+		if _, err := CreateNewReleaseFromRequest(r, channelIdentity); err != nil {
 			var msg = jsondata.Map{"error": err}
 			msg.WriteTo(w)
+		} else {
+			var msg = jsondata.Map{"success": true}
+			msg.WriteTo(w)
 		}
-		_ = item
-	*/
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Channel not found"))
+	}
 }
 
 func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*appcast.Item, error) {
@@ -121,13 +139,11 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*appc
 }
 
 func UploadPageHandler(w http.ResponseWriter, r *http.Request) {
-	uploadPageRegExp := regexp.MustCompile("/release/upload/([^/]+)/([^/]+)")
 	submatches := uploadPageRegExp.FindStringSubmatch(r.URL.Path)
 	if len(submatches) != 3 {
 		ForbiddenHandler(w, r)
 		return
 	}
-
 	channelIdentity := submatches[1]
 	channelToken := submatches[2]
 
