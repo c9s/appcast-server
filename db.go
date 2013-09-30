@@ -71,7 +71,8 @@ func createReleaseTable(db *sql.DB) {
 		version varchar,
 		shortVersionString varchar,
 		dsaSignature varchar,
-		token varchar
+		token varchar,
+		downloaded integer default 0
 	);`); err != nil {
 		log.Fatal(err)
 	}

@@ -21,6 +21,7 @@ type Release struct {
 	Version            string     `field:"version"`
 	ShortVersionString string     `field:"shortVersionString"`
 	Token              string     `field:"token"`
+	Downloaded         int64      `field:"downloaded"`
 	gatsby.BaseRecord
 }
 
