@@ -12,28 +12,34 @@
             $http.get('/=/channels').success(function(data) {
                 $scope.channels = data;
             });
-            return;
-            $scope.channels = [
-                { "name": "Nexus S",
-                  "snippet": "Fast just got faster with Nexus S.",
-                  "age": 0
-                },
-                {  "name": "Motorola XOOM™ with Wi-Fi",
-                   "snippet": "The Next, Next Generation tablet.",
-                   "age": 1
-                },
-                {  "name": "MOTOROLA XOOM™",
-                   "snippet": "The Next, Next Generation tablet.",
-                   "age": 2
-                }
-            ];
         }
-        ChannelListCtrl.$inject = ['$scope', '$http'];
+        // ChannelListCtrl.$inject = ['$scope', '$http'];
 
-        function ChannelDetailCtrl($scope,$routeParams,$http) {
-            $scope.channelId = $routeParams.channelId;
+
+        function ChannelDetailCtrl($scope, $routeParams, $http, $location) {
+            $scope.id = $routeParams.channelId;
+
+            $http.get('/=/channel/' + $routeParams.channelId).success(function(data) {
+                $scope.title = data.title;
+                $scope.token = data.token;
+                $scope.description = data.description;
+                $scope.identity = data.identity;
+            });
+
+
+            $scope.updateChannel = function() {
+                $http.post('/=/channel/' + $scope.id, {
+                    title: $scope.title,
+                    description: $scope.description,
+                    identity: $scope.identity,
+                    token: $scope.token
+                }).success(function(data) {
+                    $location.path('/channels')
+                });
+                // $scope..push({text:$scope.todoText, done:false});
+            };
         }
-        ChannelDetailCtrl.$inject = ['$scope','$routeParams','$http'];
+        // ChannelDetailCtrl.$inject = ['$scope','$routeParams','$http', '$location'];
 
         angular.module('channelcat', []).
         config(['$routeProvider', function($routeProvider) {

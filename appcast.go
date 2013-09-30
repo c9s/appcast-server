@@ -3,14 +3,17 @@ package main
 import (
 	"crypto/sha1"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/c9s/jsondata"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"path"
 	"regexp"
+	"strconv"
 	"text/template"
 	"time"
 )
@@ -20,6 +23,7 @@ import (
 	_ "github.com/c9s/appcast-server/uploader"
 	"github.com/c9s/gatsby"
 	"github.com/c9s/rss"
+	"github.com/gorilla/pat"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -217,6 +221,66 @@ func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ChannelUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	channelId, _ := strconv.Atoi(r.URL.Query().Get(":channelId"))
+	channel := Channel{}
+	channel.Init()
+
+	var payload map[string]interface{}
+	body, err := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(body, &payload)
+	if err != nil {
+		log.Println(err)
+		writeJson(w, jsondata.Map{"error": err})
+		return
+	}
+
+	var res = channel.Load(int64(channelId))
+	if res.IsEmpty {
+		writeJson(w, jsondata.Map{"error": "Channel not found"})
+		return
+	}
+	if res.Error != nil {
+		log.Println(res.Error)
+		writeJson(w, jsondata.Map{"error": res.Error})
+		return
+	}
+
+	if title, ok := payload["title"]; ok {
+		channel.Title = title.(string)
+	}
+	if description, ok := payload["description"]; ok {
+		channel.Description = description.(string)
+	}
+	if identity, ok := payload["identity"]; ok {
+		channel.Identity = identity.(string)
+	}
+	if token, ok := payload["token"]; ok {
+		channel.Token = token.(string)
+	}
+	res = channel.Update()
+	if res.Error != nil {
+		panic(res)
+	}
+	writeJson(w, channel)
+}
+
+func ChannelGetHandler(w http.ResponseWriter, r *http.Request) {
+	channelId, _ := strconv.Atoi(r.URL.Query().Get(":channelId"))
+	channel := Channel{}
+	channel.Init()
+	var res = channel.Load(int64(channelId))
+	if res.IsEmpty {
+		writeJson(w, jsondata.Map{"error": "Channel not found"})
+		return
+	}
+	if res.Error != nil {
+		writeJson(w, jsondata.Map{"error": res.Error})
+		return
+	}
+	writeJson(w, channel)
+}
+
 func main() {
 	flag.Parse()
 
@@ -240,6 +304,12 @@ func main() {
 	http.HandleFunc("/channel", ChannelListHandler)
 
 	http.HandleFunc("/=/channels", ChannelCollectionHandler)
+	http.HandleFunc("/=/channel/:channelId", ChannelCollectionHandler)
+
+	r := pat.New()
+	r.Get("/=/channel/{channelId}", ChannelGetHandler)
+	r.Post("/=/channel/{channelId}", ChannelUpdateHandler)
+	http.Handle("/", r)
 
 	http.Handle("/partials/", http.StripPrefix("/partials/", http.FileServer(http.Dir("views/partials"))))
 

@@ -11,7 +11,7 @@ import (
 
 // Channel Record
 type Channel struct {
-	Id                int64  `json:"id" field:"id"`
+	Id                int64  `json:"id" field:"id,primary"`
 	Title             string `json:"title" field:"title"`
 	Description       string `json:"description" field:"description"`
 	Identity          string `json:"identity" field:"identity"`

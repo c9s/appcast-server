@@ -1,1 +1,31 @@
-TBD: detail view for {{channelId}}
+<form method="post" enctype="multipart/form-data" ng-submit="updateChannel()">
+    <input type="hidden" ng-model="id"/>
+    <table>
+        <tr>
+            <td>Title</td>
+            <td>
+                <input type="text" ng-model="title" placeholder="Channel Title"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Identity</td>
+            <td>
+                <input type="text" ng-model="identity" placeholder="Channel Identity"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Channel Token</td>
+            <td>
+                <input type="text" ng-model="token" placeholder="Channel Token"/>
+            </td>
+        </tr>
+        <tr>
+            <td>Description</td>
+            <td>
+                <textarea ng-model="description" rows="5" cols="70"></textarea>
+            </td>
+        </tr>
+    </table>
+    <button class="btn" type="submit">Save</button>
+    <a class="btn" href="#/channels">Back</a>
+</form>
