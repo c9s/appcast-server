@@ -31,13 +31,15 @@ const SQLITEDB = "appcast.db"
 var ErrFileIsRequired = errors.New("file is required.")
 var ErrReleaseInsertFailed = errors.New("release insert failed.")
 
-var uploadPageRegExp = regexp.MustCompile("/release/upload/([^/]+)/([^/]+)")
+var routeUploadPageRegExp = regexp.MustCompile("/release/upload/([^/]+)/([^/]+)")
+var routeReleaseCreateRegExp = regexp.MustCompile("/release/create/([^/]+)/([^/]+)")
+var routeDownloadRegExp = regexp.MustCompile("/release/download/([^/]+)/([^/]+)/([^/]+)")
 
 var db *sql.DB
 var templates = template.Must(template.ParseFiles("templates/upload.html"))
 
 func UploadReleaseHandler(w http.ResponseWriter, r *http.Request) {
-	submatches := uploadPageRegExp.FindStringSubmatch(r.URL.Path)
+	submatches := routeReleaseCreateRegExp.FindStringSubmatch(r.URL.Path)
 	if len(submatches) != 3 {
 		ForbiddenHandler(w, r)
 		return
@@ -139,7 +141,7 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*appc
 }
 
 func UploadPageHandler(w http.ResponseWriter, r *http.Request) {
-	submatches := uploadPageRegExp.FindStringSubmatch(r.URL.Path)
+	submatches := routeUploadPageRegExp.FindStringSubmatch(r.URL.Path)
 	if len(submatches) != 3 {
 		ForbiddenHandler(w, r)
 		return
@@ -202,10 +204,9 @@ For route: /download/gotray/{token}
 
 /download/gotray/be24d1c54d0ba415b8897b02f0c38d89
 */
-func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
-	downloadRegExp := regexp.MustCompile("/release/download/([^/]+)/([^/]+)/([^/]+)")
-	submatches := downloadRegExp.FindStringSubmatch(r.URL.Path)
 
+func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
+	submatches := routeDownloadRegExp.FindStringSubmatch(r.URL.Path)
 	if len(submatches) != 4 {
 		ForbiddenHandler(w, r)
 		return
@@ -249,7 +250,7 @@ func main() {
 	*/
 	http.HandleFunc("/release/download/", DownloadFileHandler)
 	http.HandleFunc("/release/upload/", UploadPageHandler)
-	http.HandleFunc("/release/new/", UploadReleaseHandler)
+	http.HandleFunc("/release/create/", UploadReleaseHandler)
 	http.HandleFunc("/appcast/", AppcastXmlHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
