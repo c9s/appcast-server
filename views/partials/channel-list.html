@@ -1,20 +1,33 @@
-Search: <input ng-model="query">
-Sort by:
-<select ng-model="orderProp">
-    <option value="name">Alphabetical</option>
-    <option value="age">Newest</option>
-</select>
-<ul class="list-group">
-    <li class="list-group-item clearfix" ng-repeat="channel in channels | filter:query | orderBy:orderProp">
-        <div class="pull-left">
-            <a href="#/channels/{{channel.id}}" class="thumb">
-                <i class="glyphicon glyphicon-link"> </i> 
-                {{channel.title}}</a>
-            <p>{{channel.description}}</p>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Channel List</h2>
+    </div>
+    <div class="panel-body">
+        <div style="margin-bottom: 15px;" class="clearfix">
+            <div class="pull-right">
+                <input ng-model="query" placeholder="Search..."/>
+            </div>
+
+            <div class="pull-left">
+                <select ng-model="orderProp">
+                    <option value="name">Alphabetical</option>
+                    <option value="age">Newest</option>
+                </select>
+            </div>
         </div>
-        <div class="controls pull-right">
-            <a href="/appcast/{{channel.identity}}/{{channel.token}}" class="btn">Appcast XML</a>
-            <a href="#/channels/{{channel.id}}" class="btn">Edit</a>
-        </div>
-    </li>
-</ul>
+        <ul class="list-group">
+            <li class="list-group-item clearfix" ng-repeat="channel in channels | filter:query | orderBy:orderProp">
+                <div class="pull-left">
+                    <a href="#/channels/{{channel.id}}" class="thumb">
+                        <i class="glyphicon glyphicon-link"> </i> 
+                        {{channel.title}}</a>
+                    <p>{{channel.description}}</p>
+                </div>
+                <div class="controls pull-right">
+                    <a href="/appcast/{{channel.identity}}/{{channel.token}}" class="btn">Appcast XML</a>
+                    <a href="#/channels/{{channel.id}}" class="btn">Edit</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>

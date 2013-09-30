@@ -1,33 +1,41 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title"> 
+            <i class="glyphicon glyphicon-link"> </i> Editing {{title}} Channel  
+        </h2>
+    </div>
+    <div class="panel-body">
 
-<h2><i class="glyphicon glyphicon-link"> </i> Editing {{title}} Channel</h2>
-<form method="post" enctype="multipart/form-data" ng-submit="updateChannel()">
-    <input type="hidden" ng-model="id"/>
-    <table class="table">
-        <tr>
-            <td>Title</td>
-            <td>
-                <input type="text" ng-model="title" placeholder="Channel Title" class="form-control"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Identity</td>
-            <td>
-                <input type="text" ng-model="identity" placeholder="Channel Identity" class="form-control"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Channel Token</td>
-            <td>
-                <input type="text" ng-model="token" placeholder="Channel Token" class="form-control"/>
-            </td>
-        </tr>
-        <tr>
-            <td>Description</td>
-            <td>
-                <textarea ng-model="description" rows="5" cols="70" class="form-control"></textarea>
-            </td>
-        </tr>
-    </table>
-    <button class="btn" type="submit">Save</button>
-    <a class="btn" href="#/channels">Back</a>
-</form>
+        <form method="post" enctype="multipart/form-data" ng-submit="updateChannel()">
+            <input type="hidden" ng-model="id"/>
+            <table class="table">
+                <tr>
+                    <td>Title</td>
+                    <td>
+                        <input type="text" ng-model="title" placeholder="Channel Title" class="form-control"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Identity</td>
+                    <td>
+                        <input type="text" ng-model="identity" placeholder="Channel Identity" class="form-control"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Channel Token</td>
+                    <td>
+                        <input type="text" ng-model="token" placeholder="Channel Token" class="form-control"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>
+                        <textarea ng-model="description" rows="5" cols="70" class="form-control"></textarea>
+                    </td>
+                </tr>
+            </table>
+            <button class="btn" type="submit">Save</button>
+            <a class="btn" href="#/channels">Back</a>
+        </form>
+    </div>
+</div>
