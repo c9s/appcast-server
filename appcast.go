@@ -26,14 +26,12 @@ import (
 
 const BIND = ":5000"
 const UPLOAD_DIR = "uploads"
-const SQLITEDB = "appcast.db"
+const DEFAULT_SQLITEDB = "appcast.db"
 
-/*
-	appcast-server --domain appcast.blah.org --bind :5000
-*/
 var BASEURL string
-var domain = flag.String("domain", "localhost", "domain")
+var domain = flag.String("domain", "localhost", "base url")
 var bind = flag.String("bind", ":5000", "bind")
+var dbname = flag.String("db", DEFAULT_SQLITEDB, "database name")
 
 var ErrFileIsRequired = errors.New("file is required.")
 var ErrReleaseInsertFailed = errors.New("release insert failed.")
@@ -276,8 +274,9 @@ func main() {
 	flag.Parse()
 
 	BASEURL = "http://" + *domain
+	log.Println(BASEURL)
 
-	db = ConnectDB(SQLITEDB)
+	db = ConnectDB(*dbname)
 	gatsby.SetupConnection(db, gatsby.DriverSqlite)
 	defer db.Close()
 
