@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"database/sql"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -24,9 +25,15 @@ import (
 )
 
 const BIND = ":5000"
-const BASEURL = "http://localhost:5000"
 const UPLOAD_DIR = "uploads"
 const SQLITEDB = "appcast.db"
+
+/*
+	appcast-server --domain appcast.blah.org --bind :5000
+*/
+var BASEURL string
+var domain = flag.String("domain", "localhost", "domain")
+var bind = flag.String("bind", ":5000", "bind")
 
 var ErrFileIsRequired = errors.New("file is required.")
 var ErrReleaseInsertFailed = errors.New("release insert failed.")
@@ -266,6 +273,10 @@ func DownloadFileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	flag.Parse()
+
+	BASEURL = "http://" + *domain
+
 	db = ConnectDB(SQLITEDB)
 	gatsby.SetupConnection(db, gatsby.DriverSqlite)
 	defer db.Close()
@@ -283,8 +294,8 @@ func main() {
 	http.HandleFunc("/appcast/", AppcastXmlHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 
-	log.Println("Listening  " + BASEURL + " ...")
-	if err := http.ListenAndServe(BIND, nil); err != nil {
+	log.Println("Listening " + *bind + " ...")
+	if err := http.ListenAndServe(*bind, nil); err != nil {
 		panic(err)
 	}
 }
