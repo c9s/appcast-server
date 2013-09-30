@@ -1,0 +1,14 @@
+Search: <input ng-model="query">
+Sort by:
+<select ng-model="orderProp">
+	<option value="name">Alphabetical</option>
+	<option value="age">Newest</option>
+</select>
+<ul>
+	<li ng-repeat="channel in channels | filter:query | orderBy:orderProp">
+	<a href="#/channels/{{channel.id}}" class="thumb">
+			{{channel.title}}
+		</a>
+		<p>{{channel.description}}</p>
+	</li>
+</ul>

@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html lang="en" ng-app="channelcat">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="/public/js/bootstrap-3.0.0/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/public/js/bootstrap-3.0.0/dist/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" href="/public/style.css"/>
+        <script src="/public/js/angular.min.js"> </script>
+        <script>
+        function ChannelListCtrl($scope, $http) {
+            $http.get('/=/channels').success(function(data) {
+                $scope.channels = data;
+            });
+            return;
+            $scope.channels = [
+                { "name": "Nexus S",
+                  "snippet": "Fast just got faster with Nexus S.",
+                  "age": 0
+                },
+                {  "name": "Motorola XOOM™ with Wi-Fi",
+                   "snippet": "The Next, Next Generation tablet.",
+                   "age": 1
+                },
+                {  "name": "MOTOROLA XOOM™",
+                   "snippet": "The Next, Next Generation tablet.",
+                   "age": 2
+                }
+            ];
+        }
+        ChannelListCtrl.$inject = ['$scope', '$http'];
+
+        function ChannelDetailCtrl($scope,$routeParams,$http) {
+            $scope.channelId = $routeParams.channelId;
+        }
+        ChannelDetailCtrl.$inject = ['$scope','$routeParams','$http'];
+
+        angular.module('channelcat', []).
+        config(['$routeProvider', function($routeProvider) {
+            $routeProvider.
+                when('/channels', {templateUrl: '/partials/channel-list.html',   controller: ChannelListCtrl}).
+                when('/channels/:channelId', {templateUrl: '/partials/channel-detail.html', controller: ChannelDetailCtrl}).
+                otherwise({redirectTo: '/channels'});
+        }]);
+
+        </script>
+    </head>
+    <body>
+        <div ng-view></div>
+    </body>
+</html>

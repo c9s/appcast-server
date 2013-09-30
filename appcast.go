@@ -19,7 +19,6 @@ import (
 	"github.com/c9s/appcast"
 	_ "github.com/c9s/appcast-server/uploader"
 	"github.com/c9s/gatsby"
-	"github.com/c9s/jsondata"
 	"github.com/c9s/rss"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -42,34 +41,6 @@ var routeDownloadRegExp = regexp.MustCompile("/release/download/([^/]+)/([^/]+)/
 
 var db *sql.DB
 var templates = template.Must(template.ParseGlob("templates/*.html"))
-
-func UploadReleaseHandler(w http.ResponseWriter, r *http.Request) {
-	submatches := routeReleaseCreateRegExp.FindStringSubmatch(r.URL.Path)
-	if len(submatches) != 3 {
-		ForbiddenHandler(w, r)
-		return
-	}
-	if r.Method != "POST" {
-		ForbiddenHandler(w, r)
-		return
-	}
-
-	channelIdentity := submatches[1]
-	channelToken := submatches[2]
-
-	if channel := FindChannelByIdentity(channelIdentity, channelToken); channel != nil {
-		if _, err := CreateNewReleaseFromRequest(r, channelIdentity); err != nil {
-			var msg = jsondata.Map{"error": err}
-			msg.WriteTo(w)
-		} else {
-			var msg = jsondata.Map{"success": true}
-			msg.WriteTo(w)
-		}
-	} else {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Channel not found"))
-	}
-}
 
 func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Release, error) {
 	file, fileReader, err := r.FormFile("file")
@@ -134,30 +105,6 @@ func CreateNewReleaseFromRequest(r *http.Request, channelIdentity string) (*Rele
 	}
 	log.Println("New Release Uploaded", newRelease)
 	return &newRelease, nil
-}
-
-func CreateChannelHandler(w http.ResponseWriter, r *http.Request) {
-	var data = map[string]interface{}{}
-
-	if r.Method == "POST" {
-		newChannel := Channel{}
-		newChannel.Title = r.FormValue("title")
-		newChannel.Token = r.FormValue("token")
-		newChannel.Identity = r.FormValue("identity")
-		newChannel.Description = r.FormValue("desc")
-		newChannel.Init()
-		newChannel.Create()
-
-		data["Created"] = true
-	}
-
-	t := templates.Lookup("channel_create.html")
-	if t != nil {
-		err := t.Execute(w, data)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
 
 func UploadPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -289,7 +236,13 @@ func main() {
 	http.HandleFunc("/release/download/", DownloadFileHandler)
 	http.HandleFunc("/release/upload/", UploadPageHandler)
 	http.HandleFunc("/release/create/", UploadReleaseHandler)
-	http.HandleFunc("/channel/create", CreateChannelHandler)
+	http.HandleFunc("/channel/create", ChannelCreateHandler)
+	http.HandleFunc("/channel", ChannelListHandler)
+
+	http.HandleFunc("/=/channels", ChannelCollectionHandler)
+
+	http.Handle("/partials/", http.StripPrefix("/partials/", http.FileServer(http.Dir("views/partials"))))
+
 	http.HandleFunc("/appcast/", AppcastXmlHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 

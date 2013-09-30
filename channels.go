@@ -11,11 +11,12 @@ import (
 
 // Channel Record
 type Channel struct {
-	Title       string `field:"title"`
-	Description string `field:"description"`
-	Identity    string `field:"identity"`
-	Token       string `field:"token"`
-	gatsby.BaseRecord
+	Id                int64  `json:"id" field:"id"`
+	Title             string `json:"title" field:"title"`
+	Description       string `json:"description" field:"description"`
+	Identity          string `json:"identity" field:"identity"`
+	Token             string `json:"token" field:"token"`
+	gatsby.BaseRecord `json:"-"`
 }
 
 func (self *Channel) RegenerateToken(secret string) string {
