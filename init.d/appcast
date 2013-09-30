@@ -1,0 +1,71 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:            appcast
+# Required-Start:      $remote_fs $syslog
+# Required-Stop:       $remote_fs $syslog
+# Should-Start:        $local_fs
+# Should-Stop:         $local_fs
+# Default-Start:       2 3 4 5
+# Default-Stop:        0 1 6
+# Short-Description:   Start appcast daemon
+# Description:         Start up appcast webservice
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/home/www/appcast/appcast-server/appcast-server
+CHDIR=/home/www/appcast/appcast-server
+NAME=appcast
+DESC="Appcast Server"
+PIDFILE=/var/run/appcast.pid
+# export GOPATH=/home/appcast/rs/go
+export GOROOT=/usr/local/go
+# export GOMAXPROCS=16
+export GOGC=60
+USER=appcast
+GROUP=appcast
+
+test -x $DAEMON || exit 0
+
+set -e
+
+. /lib/lsb/init-functions
+
+function start() {
+       echo -n "Starting $DESC: "
+       start-stop-daemon --start --background \
+			--chuid $USER:$GROUP \
+			--user $USER \
+			--group $GROUP \
+			--chdir $CHDIR \
+			--make-pidfile --pidfile $PIDFILE \
+			--quiet --exec $DAEMON -- --domain blah.com --bind :5555
+       echo "$NAME."
+}
+
+function stop() {
+       echo -n "Stopping $DESC: "
+       start-stop-daemon --stop --oknodo --retry 5 --pidfile $PIDFILE
+       echo "$NAME."
+       rm -f $PIDFILE
+}
+
+case "$1" in
+  start)
+    start
+       ;;
+  stop)
+    stop
+       ;;
+
+  restart|force-reload)
+       echo -n "Restarting $DESC: "
+       stop;
+       start;
+       ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|force-reload}" >&2
+    exit 1
+    ;;
+esac
+exit 0
